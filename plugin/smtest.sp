@@ -114,6 +114,5 @@ public Action:Cmd_StartTests( client, args ) {
     new result;
     Call_StartForward(fwd_startTests);
     Call_Finish(result);
-    TestOutput(client);
 }
 
