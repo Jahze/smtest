@@ -90,12 +90,17 @@ class SmTest:
                 sys.stderr.flush();
                 time.sleep(int(parts[1]));
             else:
-                self.Rcon(command)
+                self.Rcon(command, True)
 
-    def Rcon( self, command ):
+    def Rcon( self, command, onStdout = False ):
         self.PrefixLog("rcon " + command)
         response = self.server.Rcon(command)
-        self.PrefixLog(response)
+        
+        if onStdout:
+            print(response)
+        else:
+            self.PrefixLog(response)
+            
         return response
         
     def Run( self ):
