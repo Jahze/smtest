@@ -1,7 +1,7 @@
 cfgValues = {}
 
-def read_config():
-    f = open('config.ini', 'r')
+def read_config(config_file):
+    f = open(config_file, 'r')
     for line in f:
         key,value = line.split('=', 2)
         if value[len(value)-1] == "\n":
@@ -10,5 +10,4 @@ def read_config():
 
 def config_value( key ):
     return cfgValues[key]
-
-read_config()
+    
