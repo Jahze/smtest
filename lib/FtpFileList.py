@@ -16,8 +16,12 @@ class FtpFileList:
     def ConnectToFtp( self ):
         self.PrefixLog("Connecting to ftp server " + config.config_value('FTP_HOST'))
         try:
-            ftp = ftplib.FTP(
-                config.config_value('FTP_HOST'),
+            ftp = ftplib.FTP();
+            ftp.connect(
+                config.config_value('FTP_HOST'), 
+                int(config.config_value('FTP_PORT'))
+            )
+            ftp.login(
                 config.config_value('FTP_USER'),
                 config.config_value('FTP_PASS')
             )
@@ -45,7 +49,8 @@ class FtpFileList:
 
             # Change to the correct firectory
             (folder,filename) = os.path.split(remote)
-            folder = os.path.join(config.config_value("FTP_PATH"), folder)
+            folder = folder.replace('\\', '/');
+            folder = '/'.join([config.config_value("FTP_PATH"), folder])
             if folder:
                 try:
                     self.PrefixLog("FTP: CD " + folder)
