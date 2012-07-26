@@ -1,6 +1,6 @@
-native bool:SMOK( bool:value, const String:name[]="" );
-native bool:SMIS( any:value1, any:value2, const String:name[]="" );
-native bool:SMISNT( any:value1, any:value2, const String:name[]="" );
+native bool:SMOK(bool:value, const String:name[]="", ...);
+native bool:SMIS(any:value1, any:value2, const String:name[]="", ...);
+native bool:SMISNT(any:value1, any:value2, const String:name[]="", ...);
 
 forward OnStartTests();
 

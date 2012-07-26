@@ -2,6 +2,8 @@
 
 #include <sourcemod>
 
+#define MAX_TEST_NAME_LENGTH    128
+
 new Handle:testResults;
 new Handle:testNames;
 
@@ -14,7 +16,7 @@ public Plugin:myinfo = {
     version = "1.0"
 }
 
-public APLRes:AskPluginLoad2( Handle:myself, bool:late, String:error[], err_max ) {
+public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) {
     CreateNative("SMIS", _native_SMIS);
     CreateNative("SMISNT", _native_SMISNT);
     CreateNative("SMOK", _native_SMOK);
@@ -30,60 +32,63 @@ public OnPluginStart() {
     fwd_startTests = CreateGlobalForward("OnStartTests", ET_Ignore);
 
     testResults = CreateArray();
-    testNames = CreateArray(128);
+    testNames = CreateArray(MAX_TEST_NAME_LENGTH);
 }
 
-public _native_SMOK( Handle:plugin, numparams ) {
+public _native_SMOK(Handle:plugin, numparams) {
     new bool:val = GetNativeCell(1);
     new len;
-   
+
     GetNativeStringLength(2, len);
 
-    new String:name[len+1];
-    GetNativeString(2, name, len+1);
+    new written;
+    decl String:name[MAX_TEST_NAME_LENGTH];
+    FormatNativeString(0, 2, 3, sizeof(name), written, name);
 
     return _:SMOK(val, name);
 }
 
-public _native_SMIS( Handle:plugin, numparams ) {
+public _native_SMIS(Handle:plugin, numparams) {
     new any:v1 = GetNativeCell(1);
     new any:v2 = GetNativeCell(2);
     new len;
-    
+
     GetNativeStringLength(3, len);
 
-    new String:name[len+1];
-    GetNativeString(3, name, len+1);
+    new written;
+    decl String:name[MAX_TEST_NAME_LENGTH];
+    FormatNativeString(0, 3, 4, sizeof(name), written, name);
 
     return _:SMIS(v1, v2, true, name);
 }
 
-public _native_SMISNT( Handle:plugin, numparams ) {
+public _native_SMISNT(Handle:plugin, numparams) {
     new any:v1 = GetNativeCell(1);
     new any:v2 = GetNativeCell(2);
     new len;
-    
+
     GetNativeStringLength(3, len);
 
-    new String:name[len+1];
-    GetNativeString(3, name, len+1);
+    new written;
+    decl String:name[MAX_TEST_NAME_LENGTH];
+    FormatNativeString(0, 3, 4, sizeof(name), written, name);
 
     return _:SMIS(v1, v2, false, name);
 }
 
-bool:SMIS( any:value1, any:value2, bool:expect, const String:name[]="" ) {
+bool:SMIS(any:value1, any:value2, bool:expect, const String:name[]="") {
     PushArrayString(testNames, name);
     PushArrayCell(testResults, (value1==value2) == expect);
     return (value1==value2) == expect;
 }
 
-bool:SMOK( bool:value, const String:name[]="" ) {
+bool:SMOK(bool:value, const String:name[]="") {
     PushArrayString(testNames, name);
     PushArrayCell(testResults, value);
     return value;
 }
 
-TestOutput( client ) {
+static TestOutput(client) {
     new numTests = GetArraySize(testNames);
     new passed = 0;
 
@@ -106,11 +111,11 @@ TestOutput( client ) {
     ReplyToCommand(client, "%d / %d tests passed", passed, numTests);
 }
 
-public Action:Cmd_TestOutput( client, args ) {
+public Action:Cmd_TestOutput(client, args) {
     TestOutput(client);
 }
 
-public Action:Cmd_StartTests( client, args ) {
+public Action:Cmd_StartTests(client, args) {
     new result;
     Call_StartForward(fwd_startTests);
     Call_Finish(result);
