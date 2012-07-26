@@ -26,8 +26,8 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
 }
 
 public OnPluginStart() {
-    RegConsoleCmd("sm_test_run", Cmd_StartTests);
-    RegConsoleCmd("sm_test_output", Cmd_TestOutput);
+    RegServerCmd("sm_test_run", Cmd_StartTests);
+    RegServerCmd("sm_test_output", Cmd_TestOutput);
 
     fwd_startTests = CreateGlobalForward("OnStartTests", ET_Ignore);
 
@@ -88,7 +88,7 @@ bool:SMOK(bool:value, const String:name[]="") {
     return value;
 }
 
-static TestOutput(client) {
+static TestOutput() {
     new numTests = GetArraySize(testNames);
     new passed = 0;
 
@@ -105,17 +105,17 @@ static TestOutput(client) {
             c[0] = 'N';
         }
 
-        ReplyToCommand(client,"%c.......................%s", c[0], name);
+        PrintToServer("%c.......................%s", c[0], name);
     }
 
-    ReplyToCommand(client, "%d / %d tests passed", passed, numTests);
+    PrintToServer("%d / %d tests passed", passed, numTests);
 }
 
-public Action:Cmd_TestOutput(client, args) {
-    TestOutput(client);
+public Action:Cmd_TestOutput(args) {
+    TestOutput();
 }
 
-public Action:Cmd_StartTests(client, args) {
+public Action:Cmd_StartTests(args) {
     new result;
     Call_StartForward(fwd_startTests);
     Call_Finish(result);
