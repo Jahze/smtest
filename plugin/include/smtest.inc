@@ -29,6 +29,16 @@ native bool:SMIS(any:value1, any:value2, const String:name[]="", ...);
 native bool:SMISNT(any:value1, any:value2, const String:name[]="", ...);
 
 /**
+ * Checks that two strings are equal and adds the result to the test output.
+ *
+ * @param str1
+ * @param str2
+ * @param name      test name
+ * @return bool     true if the test passed
+ */
+native bool:SMSTREQ(const String:str1[], const String:str2[], const String:name[]="", ...);
+
+/**
  * Called when the "sm_test_run" command is run.
  *
  * @note Test plugins should use this to kick of their tests.
@@ -51,5 +61,6 @@ public __pl_smtest_SetNTVOptional() {
     MarkNativeAsOptional("SMIS");
     MarkNativeAsOptional("SMISNT");
     MarkNativeAsOptional("SMOK");
+    MarkNativeAsOptional("SMSTREQ");
 }
 

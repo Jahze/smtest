@@ -20,6 +20,7 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max) 
     CreateNative("SMIS", _native_SMIS);
     CreateNative("SMISNT", _native_SMISNT);
     CreateNative("SMOK", _native_SMOK);
+    CreateNative("SMSTREQ", _native_SMSTREQ);
 
     RegPluginLibrary("smtest");
     return APLRes_Success;
@@ -76,6 +77,24 @@ public _native_SMISNT(Handle:plugin, numparams) {
     return _:SMIS(v1, v2, false, name);
 }
 
+public _native_SMSTREQ(Handle:plugin, numparams) {
+    new strlen1;
+    GetNativeStringLength(1, strlen1);
+    decl String:str1[strlen1+1];
+    GetNativeString(1, str1, strlen1+1);
+
+    new strlen2;
+    GetNativeStringLength(2, strlen2);
+    decl String:str2[strlen2+1];
+    GetNativeString(2, str2, strlen2+1);
+
+    new written;
+    decl String:name[MAX_TEST_NAME_LENGTH];
+    FormatNativeString(0, 3, 4, sizeof(name), written, name);
+
+    return _:SMSTREQ(str1, str2, name);
+}
+
 bool:SMIS(any:value1, any:value2, bool:expect, const String:name[]="") {
     PushArrayString(testNames, name);
     PushArrayCell(testResults, (value1==value2) == expect);
@@ -83,6 +102,18 @@ bool:SMIS(any:value1, any:value2, bool:expect, const String:name[]="") {
 }
 
 bool:SMOK(bool:value, const String:name[]="") {
+    PushArrayString(testNames, name);
+    PushArrayCell(testResults, value);
+    return value;
+}
+
+// TODO: as this is strongly typed it can have decent failure message, i.e. it
+// can display the values so that whoever runs the tests can eyeball the output
+// and see why they are not equal. It would be nice to do this on all test
+// failures,but as SMIS passes things as "any" i'm not sure if it the type can
+// be determined. It might be worth making SMIS_Float, etc.
+bool:SMSTREQ(const String:str1[], const String:str2[], const String:name[]="") {
+    new bool:value = StrEqual(str1, str2);
     PushArrayString(testNames, name);
     PushArrayCell(testResults, value);
     return value;
