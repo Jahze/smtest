@@ -13,7 +13,7 @@ import SpCompiler
 
 class SmTest:
     SMX_TEMP_DIR = ".smx"
-    
+
     def __init__( self, n, server ):
         self.server = server
         self.name = n
@@ -46,18 +46,18 @@ class SmTest:
         for i in self.sources:
             if not self.compiler.Compile(i):
                 return False
-            
+
             outFile = self.compiler.GetLastOutputSmx()
-            
+
             if not os.path.exists(SmTest.SMX_TEMP_DIR):
                 self.PrefixLog("Creating " + SmTest.SMX_TEMP_DIR + " directory");
                 os.makedirs(SmTest.SMX_TEMP_DIR)
-                
+
             self.PrefixLog("  > cp " + outFile + " " + SmTest.SMX_TEMP_DIR)
             shutil.move(outFile, SmTest.SMX_TEMP_DIR)    
 
             self.smxs.append(os.path.basename(outFile))
-            
+
         return True
 
     def GetAllFtpFiles( self ):
@@ -77,10 +77,10 @@ class SmTest:
 
     def FtpFiles( self ):
         return self.ftp.FtpFiles(self.GetAllFtpFiles(), self.deleteFiles);
-        
+
     def FtpDeleteFiles( self ):
         self.ftp.DeleteFiles()
-            
+
     def RunCommands( self ):
         for command in self.commands:
             if re.search("^wait", command) != None:
@@ -95,14 +95,14 @@ class SmTest:
     def Rcon( self, command, onStdout = False ):
         self.PrefixLog("rcon " + command)
         response = self.server.Rcon(command)
-        
+
         if onStdout:
             print(response)
         else:
             self.PrefixLog(response)
-            
+
         return response
-        
+
     def Run( self ):
         self.Rcon("sm plugins unload_all")
 
@@ -110,8 +110,9 @@ class SmTest:
             self.Rcon("sm plugins load " + config_value('PLUGIN_PATH') +
                 "/" + smx)
 
+        self.Rcon("sm plugins load_lock");
         self.RunCommands()
-        
+
     def Prepare( self ):
         self.PrefixLog("Preparing");
         if not self.CompileSources():
@@ -125,7 +126,8 @@ class SmTest:
 
         shutil.rmtree(SmTest.SMX_TEMP_DIR)
         self.FtpDeleteFiles()
-        
+
+        self.Rcon("sm plugins load_unlock");
         self.Rcon("sm plugins unload_all")
         self.Rcon("sm plugins refresh")
 
