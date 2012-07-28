@@ -4,10 +4,10 @@
 
 #define MAX_TEST_NAME_LENGTH    128
 
-new Handle:testResults;
-new Handle:testNames;
+new Handle:g_TestResults;
+new Handle:g_TestNames;
 
-new Handle:fwd_startTests;
+new Handle:g_FwdStartTests;
 
 public Plugin:myinfo = {
     name = "SourceMod Testing Framework",
@@ -30,18 +30,14 @@ public OnPluginStart() {
     RegServerCmd("sm_test_run", Cmd_StartTests);
     RegServerCmd("sm_test_output", Cmd_TestOutput);
 
-    fwd_startTests = CreateGlobalForward("OnStartTests", ET_Ignore);
+    g_FwdStartTests = CreateGlobalForward("OnStartTests", ET_Ignore);
 
-    testResults = CreateArray();
-    testNames = CreateArray(MAX_TEST_NAME_LENGTH);
+    g_TestResults = CreateArray();
+    g_TestNames = CreateArray(MAX_TEST_NAME_LENGTH);
 }
 
 public _native_SMOK(Handle:plugin, numparams) {
     new bool:val = GetNativeCell(1);
-    new len;
-
-    GetNativeStringLength(2, len);
-
     new written;
     decl String:name[MAX_TEST_NAME_LENGTH];
     FormatNativeString(0, 2, 3, sizeof(name), written, name);
@@ -52,10 +48,6 @@ public _native_SMOK(Handle:plugin, numparams) {
 public _native_SMIS(Handle:plugin, numparams) {
     new any:v1 = GetNativeCell(1);
     new any:v2 = GetNativeCell(2);
-    new len;
-
-    GetNativeStringLength(3, len);
-
     new written;
     decl String:name[MAX_TEST_NAME_LENGTH];
     FormatNativeString(0, 3, 4, sizeof(name), written, name);
@@ -66,10 +58,6 @@ public _native_SMIS(Handle:plugin, numparams) {
 public _native_SMISNT(Handle:plugin, numparams) {
     new any:v1 = GetNativeCell(1);
     new any:v2 = GetNativeCell(2);
-    new len;
-
-    GetNativeStringLength(3, len);
-
     new written;
     decl String:name[MAX_TEST_NAME_LENGTH];
     FormatNativeString(0, 3, 4, sizeof(name), written, name);
@@ -96,14 +84,14 @@ public _native_SMSTREQ(Handle:plugin, numparams) {
 }
 
 bool:SMIS(any:value1, any:value2, bool:expect, const String:name[]="") {
-    PushArrayString(testNames, name);
-    PushArrayCell(testResults, (value1==value2) == expect);
+    PushArrayString(g_TestNames, name);
+    PushArrayCell(g_TestResults, (value1==value2) == expect);
     return (value1==value2) == expect;
 }
 
 bool:SMOK(bool:value, const String:name[]="") {
-    PushArrayString(testNames, name);
-    PushArrayCell(testResults, value);
+    PushArrayString(g_TestNames, name);
+    PushArrayCell(g_TestResults, value);
     return value;
 }
 
@@ -114,19 +102,19 @@ bool:SMOK(bool:value, const String:name[]="") {
 // be determined. It might be worth making SMIS_Float, etc.
 bool:SMSTREQ(const String:str1[], const String:str2[], const String:name[]="") {
     new bool:value = StrEqual(str1, str2);
-    PushArrayString(testNames, name);
-    PushArrayCell(testResults, value);
+    PushArrayString(g_TestNames, name);
+    PushArrayCell(g_TestResults, value);
     return value;
 }
 
 static TestOutput() {
-    new numTests = GetArraySize(testNames);
+    new numTests = GetArraySize(g_TestNames);
     new passed = 0;
 
-    for ( new i = 0; i < GetArraySize(testNames); i++ ) {
+    for ( new i = 0; i < GetArraySize(g_TestNames); i++ ) {
         decl String:name[128], String:c[1];
-        GetArrayString(testNames, i, name, sizeof(name));
-        new result = GetArrayCell(testResults, i);
+        GetArrayString(g_TestNames, i, name, sizeof(name));
+        new result = GetArrayCell(g_TestResults, i);
         
         if ( result ) {
             c[0] = 'Y';
@@ -148,7 +136,7 @@ public Action:Cmd_TestOutput(args) {
 
 public Action:Cmd_StartTests(args) {
     new result;
-    Call_StartForward(fwd_startTests);
+    Call_StartForward(g_FwdStartTests);
     Call_Finish(result);
 }
 
