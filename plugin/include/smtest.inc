@@ -1,3 +1,8 @@
+#if defined smtest_inc_
+    #endinput
+#endif
+#define smtest_inc_
+
 /**
  * Checks if value is true and adds the result to the test output.
  *
@@ -10,23 +15,25 @@ native bool:SMOK(bool:value, const String:name[]="", ...);
 
 /**
  * Checks that value1 is equal to value2 and adds the result to the test output.
+ * @note Due to PAWN limitations this function does not support varargs.
  *
  * @param value1
  * @param value2
  * @param name      test name
  * @return bool     true if the test passed
  */
-native bool:SMIS(any:value1, any:value2, const String:name[]="", ...);
+native bool:SMIS({_, bool, Float, Handle}:value1, {_, bool, Float, Handle}:value2, const String:name[]="", tag1=tagof(value1), tag2=tagof(value2));
 
 /**
  * Checks that value1 is not equal to value2 and adds the result to the test output.
+ * @note Due to PAWN limitations this function does not support varargs.
  *
  * @param value1
  * @param value2
  * @param name      test name
  * @return bool     true if the test passed
  */
-native bool:SMISNT(any:value1, any:value2, const String:name[]="", ...);
+native bool:SMISNT({_, bool, Float, Handle}:value1, {_, bool, Float, Handle}:value2, const String:name[]="", tag1=tagof(value1), tag2=tagof(value2));
 
 /**
  * Checks that two strings are equal and adds the result to the test output.

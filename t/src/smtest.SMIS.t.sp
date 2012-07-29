@@ -10,4 +10,11 @@ public OnStartTests() {
     SMIS(2.0, 2.0, "2.0 == 2.0");
     SMIS(6.789, 6.789, "6.789 == 6.789");
     SMISNT(5.1, 5.0999, "5.1 != 5.0999");
+
+    // No test name
+    SMIS(100,100);
+
+    SMIS(INVALID_HANDLE, 8.9, "INVALID_HANDLE == 8.9 (this should fail)")
+    SMIS(6, 6.0, "6 == 6.0 (this should fail)");
+    SMIS(true, false, "true == false (this should fail)");
 }
