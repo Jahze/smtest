@@ -67,7 +67,7 @@ class Rcon:
             self.response = response
             return True
         
-        print("Unexpected respond from rcon: ", command)
+        print("Unexpected response from rcon: ", command)
         return False
         
     def RunCommand( self, command ):

@@ -30,8 +30,8 @@ class FtpFileList:
             return None
 
         return ftp
-        
-    def FtpFiles( self, ftpFiles, deleteFiles ):
+
+    def CopyFiles( self, ftpFiles, deleteFiles ):
         if len(ftpFiles) == 0:
             return True
 

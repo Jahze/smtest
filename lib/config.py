@@ -10,4 +10,7 @@ def read_config(config_file):
 
 def config_value( key ):
     return cfgValues[key]
-    
+
+def config_has_value( key ):
+    return key in cfgValues.keys()
+

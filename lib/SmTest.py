@@ -4,9 +4,10 @@ import shutil
 import sys
 import time
 
-from config import config_value
+from config import config_value,config_has_value
 from ftplib import FTP,all_errors
 
+import CopyFileList
 import FtpFileList
 import Logger
 import SpCompiler
@@ -24,7 +25,7 @@ class SmTest:
         self.smxs = []
         self.commands = []
         self.compiler = SpCompiler.SpCompiler(n)
-        self.ftp = FtpFileList.FtpFileList(n)
+        self.fileHandler = None
 
     def AddFile( self, local, remote, delete ):
         self.files[local] = remote
@@ -54,14 +55,14 @@ class SmTest:
                 os.makedirs(SmTest.SMX_TEMP_DIR)
 
             self.PrefixLog("  > cp " + outFile + " " + SmTest.SMX_TEMP_DIR)
-            shutil.move(outFile, SmTest.SMX_TEMP_DIR)    
+            shutil.move(outFile, SmTest.SMX_TEMP_DIR)
 
             self.smxs.append(os.path.basename(outFile))
 
         return True
 
-    def GetAllFtpFiles( self ):
-        ftpFiles = self.files.copy()
+    def GetAllFiles( self ):
+        files = self.files.copy()
 
         for smx in self.smxs:
             local = os.path.join(SmTest.SMX_TEMP_DIR, smx)
@@ -71,15 +72,22 @@ class SmTest:
                 os.path.basename(local)
             ])
 
-            ftpFiles[local] = remote;
+            files[local] = remote;
 
-        return ftpFiles
+        return files
 
-    def FtpFiles( self ):
-        return self.ftp.FtpFiles(self.GetAllFtpFiles(), self.deleteFiles);
+    def IsLocalServer( self ):
+        return config_has_value('LOCAL_PATH')
 
-    def FtpDeleteFiles( self ):
-        self.ftp.DeleteFiles()
+    def CopyFiles( self ):
+        if self.IsLocalServer():
+            self.fileHandler = CopyFileList.CopyFileList(self.name)
+        else:
+            self.fileHandler = FtpFileList.FtpFileList(self.name)
+        return self.fileHandler.CopyFiles(self.GetAllFiles(), self.deleteFiles)
+
+    def DeleteFiles( self ):
+        self.fileHandler.DeleteFiles()
 
     def RunCommands( self ):
         for command in self.commands:
@@ -117,15 +125,13 @@ class SmTest:
         self.PrefixLog("Preparing");
         if not self.CompileSources():
             return False
-        if not self.FtpFiles():
-            return False
-        return True
+        return self.CopyFiles()
 
     def Cleanup( self ):
         self.PrefixLog("Cleaning up");
 
         shutil.rmtree(SmTest.SMX_TEMP_DIR)
-        self.FtpDeleteFiles()
+        self.DeleteFiles()
 
         self.Rcon("sm plugins load_unlock");
         self.Rcon("sm plugins unload_all")
